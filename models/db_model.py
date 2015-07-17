@@ -1,7 +1,10 @@
 # -*- coding: utf-8 -*-
 
 from mzw2p import Q
+from plugin_ckeditor import CKEditor
 
+ckeditor = CKEditor(db)
+# ckeditor.define_tables()  -- done in controllers
 
 db.define_table('typ_zacatku',
         Field('typ', length=48),
@@ -72,8 +75,10 @@ db.define_table('kategorie_akce',
 db.define_table('akce',
         Field('idauth_user', db.auth_user, writable=False, default=auth.user_id),  # hlavní správce akce
         Field('idkategorie_akce', db.kategorie_akce),
-        Field('plati', 'boolean'),
+        Field('plati', 'boolean', default=True, label=Q("platná")),
+        Field('zrusena', 'datetime', writable=False),
         Field('nazev', length=256),
+        Field('verejne_vsem', 'boolean', default=True, label=Q('zobrazovat veřejně')),
         Field('prihlasit_do', 'datetime', label=Q('Přihlásit do'), comment=Q('prosím, přihlaste se do ..')),
         Field('minimalne', 'integer', label=Q('Minimální počet'), comment=Q('jinak bude zrušeno po datu pro přihlášení')),
         Field('kapacita', 'integer', label=Q('Kapacita akce'), comment=Q('maximální počet účastníků')),
@@ -82,11 +87,21 @@ db.define_table('akce',
         Field('konec', 'datetime'),
         Field('opakovani', length=8), # empty | wNNNNNNN(týdně,N=den v týdnu 1=Po..7=Ne) | eN(ob týden) | 1N,2N,3N,4N,lN (1-4|poslední N v měsíci)
         Field('opakovat_do', 'datetime'),
-        Field('priprava', 'text'),
-        Field('priprava_poznamky', 'text'),
-        Field('zapis_verejny', 'text'),
-        Field('zapis_soukrome', 'text'),
+        Field('popis', 'text', widget=ckeditor.widget),
+        Field('priprava_poznamky', 'text', widget=ckeditor.widget),
+        Field('zapis_verejny', 'text', widget=ckeditor.widget),
+        Field('zapis_soukrome', 'text', widget=ckeditor.widget),
         format='%(nazev)s'
+        )
+
+db.define_table('planovani_akce',
+        Field('idakce', db.akce, writable=False),
+        Field('od_roku', 'integer'),
+        Field('do_roku', 'integer'),
+        Field('od_mesice', 'integer'),
+        Field('do_mesice', 'integer'),
+        Field('plan_zacatek', 'string', length=128),
+        Field('plan_konec', 'string', length=128),
         )
 
 db.define_table('vyjimka_opakovani',
@@ -126,8 +141,10 @@ db.define_table('etapa',
         Field('realna', 'boolean'),
         Field('datum', 'datetime'),
         Field('nazev', length=256, label=Q('Název'), comment=Q('název nebo trasa')),
-        Field('popis_verejny', 'text'),
-        Field('popis_soukromy', 'text'),
+        Field('popis', 'text', widget=ckeditor.widget),
+        Field('priprava_poznamky', 'text', widget=ckeditor.widget),
+        Field('zapis_verejny', 'text', widget=ckeditor.widget),
+        Field('zapis_soukrome', 'text', widget=ckeditor.widget),
         format='%(den)s'
         )
 
